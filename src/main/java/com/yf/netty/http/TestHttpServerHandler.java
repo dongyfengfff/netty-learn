@@ -7,6 +7,8 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 
+import java.net.URI;
+
 
 /**
  * HTTPObject 客户端和服务器端通信的数据被封装成 HttpObject
@@ -20,6 +22,14 @@ public class TestHttpServerHandler extends SimpleChannelInboundHandler<HttpObjec
         // 判断 msg 是不是 httprequest 请求
         System.out.println("msg 类型 = " +  msg.getClass());
         System.out.println("客户端地址 = " + ctx.channel().remoteAddress());
+
+        HttpRequest httpRequest = (HttpRequest) msg;
+        // 获取 URI ，过滤特定的资源
+        URI uri = new URI(httpRequest.uri());
+        if ("/favicon.ico".equals(uri.getPath())) {
+            System.out.println("请求了 favicon.ico ， 不做响应");
+            return;
+        }
 
         // 回复信息给浏览器 http 协议
         ByteBuf content = Unpooled.copiedBuffer("hello , 我是服务器" , CharsetUtil.UTF_8);
